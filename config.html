@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>kakaw · configurações</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Jost:wght@200;300&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#F5EFE2; --bgCard:#EDE5D4; --div:#DDD4BC;
+    --verde:#3A5C2C; --choco:#5C3418; --cara:#A07828;
+    --dark:#1A1208; --muted:#8A7860; --mutedL:#B0A890; --white:#FFFCF5;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--bg);}
+  input::placeholder{color:var(--mutedL);font-family:'Jost',sans-serif;font-weight:300;}
+
+  .inp{
+    width:100%;padding:12px 14px;
+    background:var(--white);border:1px solid var(--div);border-radius:5px;
+    font-family:'Jost',sans-serif;font-weight:300;font-size:.95rem;
+    color:var(--dark);outline:none;transition:border .2s, box-shadow .2s;
+    -webkit-appearance:none;
+  }
+  .inp:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,92,44,.12);}
+
+  .ham{background:none;border:none;cursor:pointer;padding:6px;display:flex;flex-direction:column;gap:5px;}
+  .ham span{display:block;width:20px;height:1px;background:var(--verde);}
+  .ham span:nth-child(2){width:13px;}
+
+  .lbl{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block;}
+
+  .btn{
+    padding:14px 22px;border:none;border-radius:5px;outline:none;cursor:pointer;
+    font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;
+    transition:background .2s, opacity .2s;
+  }
+  .btn-verde{background:var(--verde);color:var(--white);}
+  .btn-verde:hover:not(:disabled){background:#4A7A38;}
+  .btn-sair{background:none;border:1px solid var(--div);color:var(--muted);}
+  .btn-sair:hover{border-color:var(--choco);color:var(--choco);}
+  .btn:disabled{opacity:.5;cursor:default;}
+
+  .card{background:var(--white);border:1px solid var(--div);border-radius:8px;padding:1.4rem;}
+
+  /* ── Abas ── */
+  .tabs{display:flex;gap:4px;padding:0 8vw;border-bottom:1px solid var(--div);position:sticky;top:65px;background:var(--bg);z-index:40;}
+  .tab-btn{
+    padding:12px 18px;background:none;border:none;cursor:pointer;
+    font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;
+  }
+  .tab-btn.ativo{color:var(--verde);border-bottom-color:var(--verde);}
+  .tab-pane{display:none;}
+  .tab-pane.ativo{display:flex;flex-direction:column;gap:1.4rem;}
+
+  /* ── Cards de lote (lançamentos) ── */
+  .lote-card{
+    background:var(--white);border:1px solid var(--div);border-radius:8px;padding:1.1rem 1.3rem;
+    display:flex;flex-direction:column;gap:.6rem;
+  }
+  .lote-titulo{
+    font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:1.15rem;color:var(--dark);
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .lote-tipo-tag{
+    font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--choco);background:var(--bgCard);padding:3px 8px;border-radius:3px;
+  }
+  .lote-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1rem;}
+  .lote-metric-lbl{font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+  .lote-metric-val{font-family:'Jost',sans-serif;font-weight:300;font-size:1rem;color:var(--dark);}
+  .lote-metric-val.lucro{color:var(--verde);}
+  .lote-metric-val.custo{color:var(--choco);}
+  .lote-excluir{
+    background:none;border:none;color:var(--mutedL);cursor:pointer;font-size:.9rem;padding:2px 6px;
+    align-self:flex-end;margin-top:-6px;
+  }
+  .lote-excluir:hover{color:#A03030;}
+
+  .resumo-dia{
+    display:flex;gap:1.4rem;padding:.9rem 1.2rem;background:var(--bgCard);border-radius:8px;
+    font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .resumo-dia b{display:block;font-family:'Jost',sans-serif;font-size:.95rem;letter-spacing:0;text-transform:none;color:var(--dark);margin-top:3px;}
+
+  .dia-header{
+    font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mutedL);
+    display:flex;align-items:center;gap:1rem;margin-top:.4rem;
+  }
+  .dia-header .linha{flex:1;height:1px;background:var(--div);}
+
+  .fab{
+    position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;
+    background:var(--verde);color:var(--white);border:none;font-size:1.6rem;cursor:pointer;
+    box-shadow:0 6px 20px rgba(58,92,44,.35);display:flex;align-items:center;justify-content:center;
+    z-index:60;transition:background .2s,transform .2s;
+  }
+  .fab:hover{background:#4A7A38;transform:scale(1.05);}
+
+  /* ── Modal genérico (lançar lote / editar item) ── */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(26,18,8,.5);z-index:300;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(2px);
+  }
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-box{
+    width:100%;max-width:380px;max-height:88vh;overflow-y:auto;
+    background:var(--bg);border:1px solid var(--div);border-radius:8px;padding:1.6rem;
+    display:flex;flex-direction:column;gap:1rem;
+  }
+  .modal-titulo{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:1.3rem;color:var(--dark);}
+  .modal-fechar{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;color:var(--mutedL);cursor:pointer;}
+  .seg{display:flex;gap:8px;}
+  .seg-btn{
+    flex:1;padding:11px;background:var(--white);border:1px solid var(--div);border-radius:5px;cursor:pointer;
+    font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+    transition:all .2s;
+  }
+  .seg-btn.sel{background:var(--verde);border-color:var(--verde);color:var(--white);}
+
+  /* ── Listas de itens (valores) ── */
+  .item-row{
+    display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--div);
+  }
+  .item-row:last-child{border-bottom:none;}
+  .item-nome{flex:1;font-family:'Jost',sans-serif;font-weight:300;font-size:.9rem;color:var(--dark);}
+  .item-valor{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--choco);white-space:nowrap;}
+  .item-acoes{display:flex;gap:6px;}
+  .item-acao-btn{background:none;border:none;cursor:pointer;padding:4px 6px;color:var(--muted);font-size:.85rem;}
+  .item-acao-btn:hover{color:var(--verde);}
+  .item-acao-btn.excluir:hover{color:#A03030;}
+
+  .subtab-title{
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .add-mini-btn{
+    background:var(--verde);color:var(--white);border:none;border-radius:5px;padding:8px 14px;cursor:pointer;
+    font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;
+  }
+  .add-mini-btn:hover{background:#4A7A38;}
+
+  .empty-msg{
+    font-family:'Jost',sans-serif;font-weight:300;font-size:.85rem;color:var(--mutedL);text-align:center;padding:1.2rem 0;
+  }
+
+  /* ── Autocomplete de sabor (lançamento) ── */
+  .autocomplete-lista{
+    position:absolute;left:0;right:0;top:100%;margin-top:4px;
+    background:var(--white);border:1px solid var(--div);border-radius:5px;
+    max-height:160px;overflow-y:auto;z-index:20;display:none;
+    box-shadow:0 6px 20px rgba(26,18,8,.12);
+  }
+  .autocomplete-lista.show{display:block;}
+  .autocomplete-item{
+    padding:10px 13px;cursor:pointer;font-family:'Jost',sans-serif;font-weight:300;font-size:.88rem;color:var(--dark);
+    border-bottom:1px solid var(--div);
+  }
+  .autocomplete-item:last-child{border-bottom:none;}
+  .autocomplete-item:hover{background:var(--bgCard);}
+  .autocomplete-item small{
+    display:block;font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:2px;
+  }
+
+  /* ── Ingredientes escolhidos dentro do recheio ── */
+  .ing-recheio-row{
+    display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--white);border:1px solid var(--div);border-radius:5px;
+    font-family:'Jost',sans-serif;font-weight:300;font-size:.85rem;color:var(--dark);
+  }
+  .ing-recheio-row .nome{flex:1;}
+  .ing-recheio-row .pct{
+    font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);white-space:nowrap;
+  }
+  .ing-recheio-row .val{
+    font-family:'DM Mono',monospace;font-size:.7rem;color:var(--choco);white-space:nowrap;
+  }
+  .ing-recheio-row .remover{background:none;border:none;color:var(--mutedL);cursor:pointer;font-size:.8rem;padding:2px 4px;}
+  .ing-recheio-row .remover:hover{color:#A03030;}
+
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+    background:var(--verde);color:var(--white);
+    padding:12px 28px;border-radius:5px;
+    font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.35em;text-transform:uppercase;
+    box-shadow:0 4px 20px rgba(58,92,44,.3);white-space:nowrap;z-index:200;display:none;
+  }
+  .toast.show{display:block;}
+  .toast.erro{background:var(--choco);}
+
+  @keyframes florGira{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+  /* ── Tela de login (fallback, acesso direto sem sessão) ── */
+  #tela-login{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .login-box{
+    width:100%;max-width:320px;background:var(--white);border:1px solid var(--div);border-radius:8px;
+    padding:40px 28px 28px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--verde);
+  }
+  .login-title{font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:1.3rem;color:var(--dark);margin-top:6px;}
+  .login-subtitle{font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.35em;text-transform:uppercase;color:var(--choco);margin-bottom:18px;}
+  .login-field{width:100%;margin-bottom:14px;}
+  .login-erro{display:none;width:100%;text-align:left;font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;color:#A03030;margin:-6px 0 12px;}
+  .login-erro.show{display:block;}
+
+  #loading-overlay{
+    position:fixed;inset:0;background:var(--bg);
+    z-index:200;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:1rem;transition:opacity .4s;
+  }
+  #loading-overlay.hide{opacity:0;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <svg width="48" height="48" viewBox="0 0 96 96" fill="none">
+    <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+    <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+    <g style="animation:florGira 2s linear infinite;transform-origin:48px 48px;">
+      <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+      <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+    </g>
+  </svg>
+  <div style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);">conectando...</div>
+</div>
+
+<!-- TELA DE LOGIN (fallback) -->
+<div id="tela-login" style="display:none;">
+  <div class="login-box">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#3A5C2C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    <div class="login-title">Configurações</div>
+    <div class="login-subtitle">acesso restrito</div>
+
+    <div class="login-field">
+      <span class="lbl">Usuário</span>
+      <input class="inp" id="login-usuario" value="admin" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <span class="lbl">Senha</span>
+      <input class="inp" id="login-senha" type="password" placeholder="digite a senha..." autocomplete="current-password"/>
+    </div>
+
+    <div id="login-erro" class="login-erro">usuário ou senha incorretos</div>
+
+    <button class="btn btn-verde" id="login-entrar" style="width:100%;">entrar</button>
+  </div>
+</div>
+
+<!-- PAINEL (visível somente com sessão válida) -->
+<div id="painel" style="display:none;background:var(--bg);min-height:100vh;">
+
+  <!-- NAV -->
+  <div style="padding:16px 20px;display:flex;align-items:center;background:var(--bg);border-bottom:1px solid var(--div);position:sticky;top:0;z-index:50;">
+    <button class="ham" onclick="openMenu()"><span></span><span></span><span></span></button>
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:10px;">
+      <svg width="24" height="24" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+        <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+        <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+        <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+        <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+        <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+      </svg>
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:1.28rem;color:var(--dark);letter-spacing:.02em;line-height:1;">kakaw</div>
+    </div>
+    <div style="width:34px;"></div>
+  </div>
+
+  <!-- LABEL SEÇÃO -->
+  <div style="padding:2rem 8vw .8rem;display:flex;align-items:baseline;gap:1.5rem;">
+    <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.4em;text-transform:uppercase;color:var(--mutedL);">•</span>
+    <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:1.5rem;color:var(--dark);">Configurações</span>
+    <div style="flex:1;height:1px;background:var(--div);margin-bottom:3px;"></div>
+    <span style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mutedL);">painel admin</span>
+  </div>
+
+  <!-- ABAS -->
+  <div class="tabs">
+    <button class="tab-btn ativo" data-tab="lancamentos">Lançamentos</button>
+    <button class="tab-btn" data-tab="valores">Valores</button>
+    <button class="tab-btn" data-tab="conta">Conta</button>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div style="padding:1.4rem 8vw 5rem;">
+
+    <!-- ══════════ ABA: LANÇAMENTOS ══════════ -->
+    <div id="tab-lancamentos" class="tab-pane ativo">
+      <div id="resumo-geral" class="resumo-dia"></div>
+      <div id="lista-lotes" style="display:flex;flex-direction:column;gap:.9rem;"></div>
+      <div id="lotes-empty" class="empty-msg" style="display:none;">nenhum lançamento ainda · toque em + para adicionar</div>
+    </div>
+
+    <!-- ══════════ ABA: VALORES ══════════ -->
+    <div id="tab-valores" class="tab-pane">
+
+      <!-- Ingredientes -->
+      <div class="card">
+        <div class="subtab-title">
+          <span class="lbl" style="margin-bottom:0;">Ingredientes</span>
+          <button class="add-mini-btn" id="btn-add-ingrediente">+ adicionar</button>
+        </div>
+        <div id="lista-ingredientes" style="margin-top:.6rem;"></div>
+        <div id="ingredientes-empty" class="empty-msg" style="display:none;">nenhum ingrediente cadastrado</div>
+      </div>
+
+      <!-- Recheios -->
+      <div class="card">
+        <div class="subtab-title">
+          <span class="lbl" style="margin-bottom:0;">Recheios</span>
+          <button class="add-mini-btn" id="btn-add-recheio">+ adicionar</button>
+        </div>
+        <div id="lista-recheios" style="margin-top:.6rem;"></div>
+        <div id="recheios-empty" class="empty-msg" style="display:none;">nenhum recheio cadastrado</div>
+      </div>
+
+      <!-- Enfeites -->
+      <div class="card">
+        <div class="subtab-title">
+          <span class="lbl" style="margin-bottom:0;">Enfeites (por sabor, usado em cones)</span>
+          <button class="add-mini-btn" id="btn-add-enfeite">+ adicionar</button>
+        </div>
+        <div id="lista-enfeites" style="margin-top:.6rem;"></div>
+        <div id="enfeites-empty" class="empty-msg" style="display:none;">nenhum enfeite cadastrado</div>
+      </div>
+
+      <!-- Casquinha de Trufa -->
+      <div class="card">
+        <span class="lbl">Casquinha de Trufa</span>
+        <div style="display:flex;gap:10px;margin-bottom:.9rem;">
+          <div style="flex:1;">
+            <span class="lbl">Casca de chocolate (R$)</span>
+            <input class="inp" id="trufa-casca" type="number" step="0.01" placeholder="0,00"/>
+          </div>
+          <div style="flex:1;">
+            <span class="lbl">Embalagem (R$)</span>
+            <input class="inp" id="trufa-embalagem" type="number" step="0.01" placeholder="0,00"/>
+          </div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;">
+          total por trufa: <span id="trufa-total" style="color:var(--choco);">R$0,00</span>
+        </div>
+        <button class="btn btn-verde" id="btn-salvar-trufa">salvar casquinha de trufa</button>
+      </div>
+
+      <!-- Casquinha de Cone -->
+      <div class="card">
+        <span class="lbl">Casquinha de Cone</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.9rem;">
+          <div><span class="lbl">Casquinha (R$)</span><input class="inp" id="cone-casquinha" type="number" step="0.01" placeholder="0,00"/></div>
+          <div><span class="lbl">Chocolate (R$)</span><input class="inp" id="cone-chocolate" type="number" step="0.01" placeholder="0,00"/></div>
+          <div><span class="lbl">Embalagem (R$)</span><input class="inp" id="cone-embalagem" type="number" step="0.01" placeholder="0,00"/></div>
+          <div><span class="lbl">Fecho (R$)</span><input class="inp" id="cone-fecho" type="number" step="0.01" placeholder="0,00"/></div>
+          <div style="grid-column:1/-1;"><span class="lbl">Etiqueta (R$)</span><input class="inp" id="cone-etiqueta" type="number" step="0.01" placeholder="0,00"/></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;">
+          total por cone: <span id="cone-total" style="color:var(--choco);">R$0,00</span>
+        </div>
+        <button class="btn btn-verde" id="btn-salvar-cone">salvar casquinha de cone</button>
+      </div>
+
+      <!-- Preços de venda -->
+      <div class="card">
+        <span class="lbl">Preço de venda</span>
+        <div style="display:flex;gap:10px;margin-bottom:.9rem;">
+          <div style="flex:1;"><span class="lbl">Trufa (R$)</span><input class="inp" id="preco-trufa" type="number" step="0.01" placeholder="3,00"/></div>
+          <div style="flex:1;"><span class="lbl">Cone (R$)</span><input class="inp" id="preco-cone" type="number" step="0.01" placeholder="10,00"/></div>
+        </div>
+        <button class="btn btn-verde" id="btn-salvar-precos">salvar preços</button>
+      </div>
+
+    </div>
+
+    <!-- ══════════ ABA: CONTA ══════════ -->
+    <div id="tab-conta" class="tab-pane">
+      <!-- Trocar credenciais -->
+      <div class="card">
+        <span class="lbl">Alterar usuário e senha</span>
+        <div style="margin-bottom:1rem;">
+          <span class="lbl">Usuário</span>
+          <input class="inp" id="cfg-usuario" placeholder="usuário atual"/>
+        </div>
+        <div style="margin-bottom:1.2rem;">
+          <span class="lbl">Nova senha</span>
+          <input class="inp" id="cfg-senha" type="password" placeholder="deixe em branco para não alterar"/>
+        </div>
+        <button class="btn btn-verde" id="cfg-salvar">salvar alterações</button>
+      </div>
+
+      <!-- Sair -->
+      <button class="btn btn-sair" id="btn-sair" style="width:100%;">sair do painel</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAB (adicionar lançamento) -->
+<button class="fab" id="fab-add-lote" style="display:none;">+</button>
+
+<!-- MODAL: novo lançamento -->
+<div class="modal-overlay" id="modal-lote">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-fechar" data-close-modal="modal-lote">&times;</button>
+    <div class="modal-titulo">Novo lançamento</div>
+
+    <div>
+      <span class="lbl">Tipo</span>
+      <div class="seg" id="seg-tipo">
+        <button class="seg-btn sel" data-tipo="cone">Cone</button>
+        <button class="seg-btn" data-tipo="trufa">Trufa</button>
+      </div>
+    </div>
+
+    <div style="position:relative;">
+      <span class="lbl">Sabor</span>
+      <input class="inp" id="lote-sabor" autocomplete="off" placeholder="digite ou escolha um sabor..."/>
+      <div id="lote-sabor-sugestoes" class="autocomplete-lista"></div>
+    </div>
+
+    <div>
+      <span class="lbl">Valor do recheio (R$)</span>
+      <input class="inp" id="lote-valor-recheio" type="number" step="0.01" placeholder="0,00"/>
+    </div>
+
+    <div>
+      <span class="lbl">Quantidade produzida</span>
+      <input class="inp" id="lote-quantidade" type="number" min="1" placeholder="0"/>
+    </div>
+
+    <div id="lote-preview" style="font-family:'Jost',sans-serif;font-weight:300;font-size:.85rem;color:var(--muted);line-height:1.8;background:var(--white);border:1px solid var(--div);border-radius:5px;padding:.8rem 1rem;"></div>
+
+    <button class="btn btn-verde" id="btn-lancar-lote" style="width:100%;">lançar</button>
+  </div>
+</div>
+
+<!-- MODAL: ingrediente -->
+<div class="modal-overlay" id="modal-ingrediente">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-fechar" data-close-modal="modal-ingrediente">&times;</button>
+    <div class="modal-titulo" id="ingrediente-titulo">Novo ingrediente</div>
+    <input type="hidden" id="ingrediente-id"/>
+    <div>
+      <span class="lbl">Nome</span>
+      <input class="inp" id="ingrediente-nome" placeholder="ex: leite condensado"/>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;">
+        <span class="lbl">Valor pago (R$)</span>
+        <input class="inp" id="ingrediente-valor" type="number" step="0.01" placeholder="0,00"/>
+      </div>
+      <div style="flex:1;">
+        <span class="lbl">Quantidade da embalagem</span>
+        <input class="inp" id="ingrediente-quantidade" type="number" step="0.01" placeholder="ex: 395 (g/ml/un)"/>
+      </div>
+    </div>
+    <button class="btn btn-verde" id="btn-salvar-ingrediente" style="width:100%;">salvar</button>
+  </div>
+</div>
+
+<!-- MODAL: recheio -->
+<div class="modal-overlay" id="modal-recheio">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-fechar" data-close-modal="modal-recheio">&times;</button>
+    <div class="modal-titulo" id="recheio-titulo">Novo recheio</div>
+    <input type="hidden" id="recheio-id"/>
+    <div>
+      <span class="lbl">Nome do sabor</span>
+      <input class="inp" id="recheio-nome" placeholder="ex: brigadeiro, maracujá..."/>
+    </div>
+
+    <div>
+      <span class="lbl">Modo de custo</span>
+      <div class="seg" id="seg-recheio-modo">
+        <button class="seg-btn sel" data-modo="ingredientes">Montar com ingredientes</button>
+        <button class="seg-btn" data-modo="manual">Valor manual</button>
+      </div>
+    </div>
+
+    <!-- Modo manual -->
+    <div id="recheio-modo-manual" style="display:none;">
+      <span class="lbl">Custo total da receita (R$)</span>
+      <input class="inp" id="recheio-custo-manual" type="number" step="0.01" placeholder="ex: 16,07"/>
+    </div>
+
+    <!-- Modo ingredientes -->
+    <div id="recheio-modo-ingredientes">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:.7rem;">
+        <div style="flex:2;">
+          <span class="lbl">Ingrediente</span>
+          <select class="inp" id="recheio-ing-select" style="cursor:pointer;"></select>
+        </div>
+        <div style="flex:1;">
+          <span class="lbl">% usado</span>
+          <input class="inp" id="recheio-ing-percentual" type="number" step="1" min="1" max="100" placeholder="ex: 25"/>
+        </div>
+        <button class="add-mini-btn" id="btn-add-ing-recheio" style="height:44px;white-space:nowrap;">+ add</button>
+      </div>
+      <div id="recheio-ing-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:.6rem;"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);">
+        custo total calculado: <span id="recheio-custo-calculado" style="color:var(--choco);">R$0,00</span>
+      </div>
+    </div>
+
+    <button class="btn btn-verde" id="btn-salvar-recheio" style="width:100%;">salvar</button>
+  </div>
+</div>
+
+<!-- MODAL: enfeite -->
+<div class="modal-overlay" id="modal-enfeite">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-fechar" data-close-modal="modal-enfeite">&times;</button>
+    <div class="modal-titulo" id="enfeite-titulo">Novo enfeite</div>
+    <input type="hidden" id="enfeite-id"/>
+    <div>
+      <span class="lbl">Sabor</span>
+      <input class="inp" id="enfeite-nome" placeholder="ex: maracujá (deve bater com o nome do recheio)"/>
+    </div>
+    <div>
+      <span class="lbl">Valor (R$)</span>
+      <input class="inp" id="enfeite-valor" type="number" step="0.01" placeholder="0,00"/>
+    </div>
+    <button class="btn btn-verde" id="btn-salvar-enfeite" style="width:100%;">salvar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">alterações salvas ✦</div>
+
+<!-- AUTH (Firebase) -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="financeiro.js"></script>
+
+<script type="module">
+  function aguardarAuth() {
+    if (window.kakawAuth) return Promise.resolve();
+    return new Promise(resolve => {
+      window.addEventListener("kakawAuthReady", () => resolve(), { once: true });
+      setTimeout(() => { if (window.kakawAuth) resolve(); }, 3000);
+    });
+  }
+  function aguardarFin() {
+    if (window.kakawFin) return Promise.resolve();
+    return new Promise(resolve => {
+      window.addEventListener("kakawFinReady", () => resolve(), { once: true });
+      setTimeout(() => { if (window.kakawFin) resolve(); }, 3000);
+    });
+  }
+
+  function fmt(v){ return "R$" + Number(v||0).toFixed(2).replace(".", ","); }
+
+  async function iniciar() {
+    await Promise.all([aguardarAuth(), aguardarFin()]);
+    document.getElementById("loading-overlay").classList.add("hide");
+
+    if (window.kakawAuth.sessaoAtiva()) {
+      mostrarPainel();
+    } else {
+      mostrarLogin();
+    }
+  }
+
+  function mostrarPainel() {
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("painel").style.display = "block";
+    document.getElementById("fab-add-lote").style.display = "flex";
+    const inpUsuario = document.getElementById("cfg-usuario");
+    try {
+      const sess = JSON.parse(localStorage.getItem("kakaw-admin-sessao") || "{}");
+      if (sess.login) inpUsuario.value = sess.login;
+    } catch (e) {}
+    carregarTudo();
+  }
+
+  function mostrarLogin() {
+    document.getElementById("painel").style.display = "none";
+    document.getElementById("fab-add-lote").style.display = "none";
+    document.getElementById("tela-login").style.display = "flex";
+    setTimeout(() => document.getElementById("login-senha").focus(), 100);
+  }
+
+  async function tentarLogin() {
+    const btn   = document.getElementById("login-entrar");
+    const erro  = document.getElementById("login-erro");
+    const login = document.getElementById("login-usuario").value.trim();
+    const senha = document.getElementById("login-senha").value;
+
+    erro.classList.remove("show");
+    btn.disabled = true;
+    btn.textContent = "verificando...";
+
+    try {
+      const ok = await window.kakawAuth.verificar(login, senha);
+      if (ok) {
+        window.kakawAuth.salvarSessao(login);
+        mostrarPainel();
+      } else {
+        erro.classList.add("show");
+        btn.disabled = false;
+        btn.textContent = "entrar";
+      }
+    } catch (e) {
+      console.error("Erro ao validar login:", e);
+      erro.textContent = "erro de conexão, tente novamente";
+      erro.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = "entrar";
+    }
+  }
+
+  document.getElementById("login-entrar").addEventListener("click", tentarLogin);
+  document.getElementById("login-senha").addEventListener("keydown", e => {
+    if (e.key === "Enter") tentarLogin();
+  });
+
+  document.getElementById("btn-sair").addEventListener("click", () => {
+    window.kakawAuth.sair();
+    window.location.href = "index.html";
+  });
+
+  document.getElementById("cfg-salvar").addEventListener("click", async () => {
+    const btn   = document.getElementById("cfg-salvar");
+    const toast = document.getElementById("toast");
+    const novoLogin = document.getElementById("cfg-usuario").value.trim();
+    const novaSenha = document.getElementById("cfg-senha").value;
+
+    if (!novoLogin) {
+      toastMsg("informe um usuário válido ✕", true);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "salvando...";
+    try {
+      await window.kakawAuth.trocarLogin(novoLogin);
+      if (novaSenha) await window.kakawAuth.trocarSenha(novaSenha);
+      window.kakawAuth.salvarSessao(novoLogin);
+      document.getElementById("cfg-senha").value = "";
+      toastMsg("alterações salvas ✦");
+    } catch (e) {
+      console.error("Erro ao salvar credenciais:", e);
+      toastMsg("erro ao salvar ✕", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "salvar alterações";
+    }
+  });
+
+  function toastMsg(msg, erro) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.remove("erro");
+    if (erro) toast.classList.add("erro");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show", "erro"), 2800);
+  }
+
+  /* ── Abas ─────────────────────────────────────────────────── */
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("ativo"));
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("ativo"));
+      btn.classList.add("ativo");
+      document.getElementById("tab-" + btn.dataset.tab).classList.add("ativo");
+      document.getElementById("fab-add-lote").style.display = btn.dataset.tab === "lancamentos" ? "flex" : "none";
+    });
+  });
+
+  /* ── Modais genéricos ────────────────────────────────────────── */
+  function abrirModal(id) { document.getElementById(id).classList.add("open"); }
+  function fecharModal(id) { document.getElementById(id).classList.remove("open"); }
+  document.querySelectorAll("[data-close-modal]").forEach(btn => {
+    btn.addEventListener("click", () => fecharModal(btn.dataset.closeModal));
+  });
+  document.querySelectorAll(".modal-overlay").forEach(ov => {
+    ov.addEventListener("click", e => { if (e.target === ov) fecharModal(ov.id); });
+  });
+
+  /* ── Estado em memória (cache local pra evitar recarregar toda hora) ── */
+  let cacheIngredientes = [];
+  let cacheRecheios = [];
+  let cacheEnfeites = [];
+  let cacheGeral = null;
+  let cacheLotes = [];
+
+  async function carregarTudo() {
+    await Promise.all([carregarIngredientes(), carregarRecheios(), carregarEnfeites(), carregarGeral(), carregarLotes()]);
+  }
+
+  /* ── Ingredientes ─────────────────────────────────────────────── */
+  async function carregarIngredientes() {
+    cacheIngredientes = await window.kakawFin.listarIngredientes();
+    const lista = document.getElementById("lista-ingredientes");
+    const empty = document.getElementById("ingredientes-empty");
+    lista.innerHTML = "";
+    empty.style.display = cacheIngredientes.length ? "none" : "block";
+    cacheIngredientes.forEach(ing => {
+      lista.appendChild(criarItemRow(`${ing.nome} · ${ing.quantidade || "?"}`, fmt(ing.valor),
+        () => abrirIngredienteEdicao(ing),
+        () => excluirComConfirmacao("ingrediente", ing.nome, async () => {
+          await window.kakawFin.excluirIngrediente(ing.id);
+          await carregarIngredientes();
+        })
+      ));
+    });
+  }
+
+  function criarItemRow(nome, valor, onEdit, onDelete) {
+    const row = document.createElement("div");
+    row.className = "item-row";
+    row.innerHTML = `
+      <span class="item-nome"></span>
+      <span class="item-valor"></span>
+      <div class="item-acoes">
+        <button class="item-acao-btn editar" title="editar">✎</button>
+        <button class="item-acao-btn excluir" title="excluir">✕</button>
+      </div>`;
+    row.querySelector(".item-nome").textContent = nome;
+    row.querySelector(".item-valor").textContent = valor;
+    row.querySelector(".editar").addEventListener("click", onEdit);
+    row.querySelector(".excluir").addEventListener("click", onDelete);
+    return row;
+  }
+
+  function excluirComConfirmacao(tipoLabel, nome, callback) {
+    if (confirm(`Excluir ${tipoLabel} "${nome}"? Essa ação não pode ser desfeita.`)) {
+      callback();
+    }
+  }
+
+  document.getElementById("btn-add-ingrediente").addEventListener("click", () => {
+    document.getElementById("ingrediente-id").value = "";
+    document.getElementById("ingrediente-nome").value = "";
+    document.getElementById("ingrediente-valor").value = "";
+    document.getElementById("ingrediente-quantidade").value = "";
+    document.getElementById("ingrediente-titulo").textContent = "Novo ingrediente";
+    abrirModal("modal-ingrediente");
+  });
+
+  function abrirIngredienteEdicao(ing) {
+    document.getElementById("ingrediente-id").value = ing.id;
+    document.getElementById("ingrediente-nome").value = ing.nome;
+    document.getElementById("ingrediente-valor").value = ing.valor;
+    document.getElementById("ingrediente-quantidade").value = ing.quantidade || "";
+    document.getElementById("ingrediente-titulo").textContent = "Editar ingrediente";
+    abrirModal("modal-ingrediente");
+  }
+
+  document.getElementById("btn-salvar-ingrediente").addEventListener("click", async () => {
+    const id = document.getElementById("ingrediente-id").value || null;
+    const nome = document.getElementById("ingrediente-nome").value.trim();
+    const valor = document.getElementById("ingrediente-valor").value;
+    const quantidade = document.getElementById("ingrediente-quantidade").value;
+    if (!nome || valor === "" || quantidade === "") { toastMsg("preencha nome, valor e quantidade ✕", true); return; }
+    try {
+      await window.kakawFin.salvarIngrediente({ id, nome, valor: Number(valor), quantidade: Number(quantidade) });
+      fecharModal("modal-ingrediente");
+      toastMsg("ingrediente salvo ✦");
+      await carregarIngredientes();
+    } catch (e) {
+      console.error(e);
+      toastMsg("erro ao salvar ✕", true);
+    }
+  });
+
+  /* ── Recheios ─────────────────────────────────────────────────── */
+  async function carregarRecheios() {
+    cacheRecheios = await window.kakawFin.listarRecheios();
+    const lista = document.getElementById("lista-recheios");
+    const empty = document.getElementById("recheios-empty");
+    lista.innerHTML = "";
+    empty.style.display = cacheRecheios.length ? "none" : "block";
+    cacheRecheios.forEach(r => {
+      const origem = r.ingredientes && r.ingredientes.length ? `${r.ingredientes.length} ingrediente(s)` : "valor manual";
+      lista.appendChild(criarItemRow(`${r.nome} · ${origem}`, fmt(r.custoTotal),
+        () => abrirRecheioEdicao(r),
+        () => excluirComConfirmacao("recheio", r.nome, async () => {
+          await window.kakawFin.excluirRecheio(r.id);
+          await carregarRecheios();
+        })
+      ));
+    });
+  }
+
+  let recheioIngredientesSelecionados = []; // [{ingredienteId, percentual}]
+  let recheioModoAtual = "ingredientes";
+
+  function popularSelectIngredientes() {
+    const sel = document.getElementById("recheio-ing-select");
+    sel.innerHTML = cacheIngredientes.map(i => `<option value="${i.id}">${i.nome}</option>`).join("");
+  }
+
+  document.querySelectorAll("#seg-recheio-modo .seg-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      recheioModoAtual = btn.dataset.modo;
+      document.querySelectorAll("#seg-recheio-modo .seg-btn").forEach(b => b.classList.toggle("sel", b === btn));
+      document.getElementById("recheio-modo-manual").style.display = recheioModoAtual === "manual" ? "block" : "none";
+      document.getElementById("recheio-modo-ingredientes").style.display = recheioModoAtual === "ingredientes" ? "block" : "none";
+    });
+  });
+
+  document.getElementById("btn-add-ing-recheio").addEventListener("click", () => {
+    const ingId = document.getElementById("recheio-ing-select").value;
+    const pct = document.getElementById("recheio-ing-percentual").value;
+    if (!ingId || !pct || Number(pct) <= 0) { toastMsg("escolha o ingrediente e o % usado ✕", true); return; }
+    // evita duplicar o mesmo ingrediente, soma o percentual se já existir
+    const existente = recheioIngredientesSelecionados.find(s => s.ingredienteId === ingId);
+    if (existente) {
+      existente.percentual = Number(existente.percentual) + Number(pct);
+    } else {
+      recheioIngredientesSelecionados.push({ ingredienteId: ingId, percentual: Number(pct) });
+    }
+    document.getElementById("recheio-ing-percentual").value = "";
+    renderRecheioIngredientesLista();
+  });
+
+  function renderRecheioIngredientesLista() {
+    const cont = document.getElementById("recheio-ing-lista");
+    cont.innerHTML = "";
+    let total = 0;
+    recheioIngredientesSelecionados.forEach((sel, idx) => {
+      const ing = cacheIngredientes.find(i => i.id === sel.ingredienteId);
+      const valor = ing ? Number(ing.valor) * (Number(sel.percentual) / 100) : 0;
+      total += valor;
+      const row = document.createElement("div");
+      row.className = "ing-recheio-row";
+      row.innerHTML = `
+        <span class="nome">${ing ? ing.nome : "?"}</span>
+        <span class="pct">${sel.percentual}%</span>
+        <span class="val">${fmt(valor)}</span>
+        <button class="remover" title="remover">✕</button>`;
+      row.querySelector(".remover").addEventListener("click", () => {
+        recheioIngredientesSelecionados.splice(idx, 1);
+        renderRecheioIngredientesLista();
+      });
+      cont.appendChild(row);
+    });
+    document.getElementById("recheio-custo-calculado").textContent = fmt(total);
+  }
+
+  document.getElementById("btn-add-recheio").addEventListener("click", () => {
+    document.getElementById("recheio-id").value = "";
+    document.getElementById("recheio-nome").value = "";
+    document.getElementById("recheio-custo-manual").value = "";
+    recheioIngredientesSelecionados = [];
+    recheioModoAtual = "ingredientes";
+    document.querySelectorAll("#seg-recheio-modo .seg-btn").forEach(b => b.classList.toggle("sel", b.dataset.modo === "ingredientes"));
+    document.getElementById("recheio-modo-manual").style.display = "none";
+    document.getElementById("recheio-modo-ingredientes").style.display = "block";
+    document.getElementById("recheio-titulo").textContent = "Novo recheio";
+    popularSelectIngredientes();
+    renderRecheioIngredientesLista();
+    abrirModal("modal-recheio");
+  });
+
+  function abrirRecheioEdicao(r) {
+    document.getElementById("recheio-id").value = r.id;
+    document.getElementById("recheio-nome").value = r.nome;
+    document.getElementById("recheio-titulo").textContent = "Editar recheio";
+    popularSelectIngredientes();
+
+    if (r.ingredientes && r.ingredientes.length) {
+      recheioModoAtual = "ingredientes";
+      recheioIngredientesSelecionados = r.ingredientes.map(i => ({ ingredienteId: i.ingredienteId, percentual: i.percentual }));
+      document.querySelectorAll("#seg-recheio-modo .seg-btn").forEach(b => b.classList.toggle("sel", b.dataset.modo === "ingredientes"));
+      document.getElementById("recheio-modo-manual").style.display = "none";
+      document.getElementById("recheio-modo-ingredientes").style.display = "block";
+      document.getElementById("recheio-custo-manual").value = "";
+    } else {
+      recheioModoAtual = "manual";
+      recheioIngredientesSelecionados = [];
+      document.querySelectorAll("#seg-recheio-modo .seg-btn").forEach(b => b.classList.toggle("sel", b.dataset.modo === "manual"));
+      document.getElementById("recheio-modo-manual").style.display = "block";
+      document.getElementById("recheio-modo-ingredientes").style.display = "none";
+      document.getElementById("recheio-custo-manual").value = r.custoTotal;
+    }
+    renderRecheioIngredientesLista();
+    abrirModal("modal-recheio");
+  }
+
+  document.getElementById("btn-salvar-recheio").addEventListener("click", async () => {
+    const id = document.getElementById("recheio-id").value || null;
+    const nome = document.getElementById("recheio-nome").value.trim();
+    if (!nome) { toastMsg("informe o nome do sabor ✕", true); return; }
+
+    let custoTotal, ingredientesParaSalvar;
+    if (recheioModoAtual === "manual") {
+      const valorManual = document.getElementById("recheio-custo-manual").value;
+      if (valorManual === "") { toastMsg("informe o custo total ✕", true); return; }
+      custoTotal = Number(valorManual);
+      ingredientesParaSalvar = null;
+    } else {
+      if (!recheioIngredientesSelecionados.length) { toastMsg("adicione ao menos um ingrediente ✕", true); return; }
+      const { total, detalhes } = window.kakawFin.calcularCustoRecheioPorIngredientes(recheioIngredientesSelecionados, cacheIngredientes);
+      custoTotal = total;
+      ingredientesParaSalvar = detalhes;
+    }
+
+    try {
+      await window.kakawFin.salvarRecheio({ id, nome, custoTotal, ingredientes: ingredientesParaSalvar });
+      fecharModal("modal-recheio");
+      toastMsg("recheio salvo ✦");
+      await carregarRecheios();
+    } catch (e) {
+      console.error(e);
+      toastMsg("erro ao salvar ✕", true);
+    }
+  });
+
+  /* ── Enfeites ─────────────────────────────────────────────────── */
+  async function carregarEnfeites() {
+    cacheEnfeites = await window.kakawFin.listarEnfeites();
+    const lista = document.getElementById("lista-enfeites");
+    const empty = document.getElementById("enfeites-empty");
+    lista.innerHTML = "";
+    empty.style.display = cacheEnfeites.length ? "none" : "block";
+    cacheEnfeites.forEach(en => {
+      lista.appendChild(criarItemRow(en.nome, fmt(en.valor),
+        () => abrirEnfeiteEdicao(en),
+        () => excluirComConfirmacao("enfeite", en.nome, async () => {
+          await window.kakawFin.excluirEnfeite(en.id);
+          await carregarEnfeites();
+        })
+      ));
+    });
+  }
+
+  document.getElementById("btn-add-enfeite").addEventListener("click", () => {
+    document.getElementById("enfeite-id").value = "";
+    document.getElementById("enfeite-nome").value = "";
+    document.getElementById("enfeite-valor").value = "";
+    document.getElementById("enfeite-titulo").textContent = "Novo enfeite";
+    abrirModal("modal-enfeite");
+  });
+
+  function abrirEnfeiteEdicao(en) {
+    document.getElementById("enfeite-id").value = en.id;
+    document.getElementById("enfeite-nome").value = en.nome;
+    document.getElementById("enfeite-valor").value = en.valor;
+    document.getElementById("enfeite-titulo").textContent = "Editar enfeite";
+    abrirModal("modal-enfeite");
+  }
+
+  document.getElementById("btn-salvar-enfeite").addEventListener("click", async () => {
+    const id = document.getElementById("enfeite-id").value || null;
+    const nome = document.getElementById("enfeite-nome").value.trim();
+    const valor = document.getElementById("enfeite-valor").value;
+    if (!nome || valor === "") { toastMsg("preencha sabor e valor ✕", true); return; }
+    try {
+      await window.kakawFin.salvarEnfeite({ id, nome, valor });
+      fecharModal("modal-enfeite");
+      toastMsg("enfeite salvo ✦");
+      await carregarEnfeites();
+    } catch (e) {
+      console.error(e);
+      toastMsg("erro ao salvar ✕", true);
+    }
+  });
+
+  /* ── Config geral: casquinhas e preços ───────────────────────── */
+  async function carregarGeral() {
+    cacheGeral = await window.kakawFin.obterGeral();
+    document.getElementById("trufa-casca").value = cacheGeral.casquinhaTrufa.casca || "";
+    document.getElementById("trufa-embalagem").value = cacheGeral.casquinhaTrufa.embalagem || "";
+    document.getElementById("cone-casquinha").value = cacheGeral.casquinhaCone.casquinha || "";
+    document.getElementById("cone-chocolate").value = cacheGeral.casquinhaCone.chocolate || "";
+    document.getElementById("cone-embalagem").value = cacheGeral.casquinhaCone.embalagem || "";
+    document.getElementById("cone-fecho").value = cacheGeral.casquinhaCone.fecho || "";
+    document.getElementById("cone-etiqueta").value = cacheGeral.casquinhaCone.etiqueta || "";
+    document.getElementById("preco-trufa").value = cacheGeral.precoTrufa || "";
+    document.getElementById("preco-cone").value = cacheGeral.precoCone || "";
+    atualizarTotaisCasquinha();
+  }
+
+  function atualizarTotaisCasquinha() {
+    const tCasca = Number(document.getElementById("trufa-casca").value || 0);
+    const tEmb   = Number(document.getElementById("trufa-embalagem").value || 0);
+    document.getElementById("trufa-total").textContent = fmt(tCasca + tEmb);
+
+    const cCasq = Number(document.getElementById("cone-casquinha").value || 0);
+    const cChoc = Number(document.getElementById("cone-chocolate").value || 0);
+    const cEmb  = Number(document.getElementById("cone-embalagem").value || 0);
+    const cFecho= Number(document.getElementById("cone-fecho").value || 0);
+    const cEtiq = Number(document.getElementById("cone-etiqueta").value || 0);
+    document.getElementById("cone-total").textContent = fmt(cCasq + cChoc + cEmb + cFecho + cEtiq);
+  }
+
+  ["trufa-casca","trufa-embalagem","cone-casquinha","cone-chocolate","cone-embalagem","cone-fecho","cone-etiqueta"]
+    .forEach(id => document.getElementById(id).addEventListener("input", atualizarTotaisCasquinha));
+
+  document.getElementById("btn-salvar-trufa").addEventListener("click", async () => {
+    try {
+      await window.kakawFin.salvarGeral({
+        casquinhaTrufa: {
+          casca: Number(document.getElementById("trufa-casca").value || 0),
+          embalagem: Number(document.getElementById("trufa-embalagem").value || 0)
+        }
+      });
+      toastMsg("casquinha de trufa salva ✦");
+      await carregarGeral();
+    } catch (e) { console.error(e); toastMsg("erro ao salvar ✕", true); }
+  });
+
+  document.getElementById("btn-salvar-cone").addEventListener("click", async () => {
+    try {
+      await window.kakawFin.salvarGeral({
+        casquinhaCone: {
+          casquinha: Number(document.getElementById("cone-casquinha").value || 0),
+          chocolate: Number(document.getElementById("cone-chocolate").value || 0),
+          embalagem: Number(document.getElementById("cone-embalagem").value || 0),
+          fecho: Number(document.getElementById("cone-fecho").value || 0),
+          etiqueta: Number(document.getElementById("cone-etiqueta").value || 0)
+        }
+      });
+      toastMsg("casquinha de cone salva ✦");
+      await carregarGeral();
+    } catch (e) { console.error(e); toastMsg("erro ao salvar ✕", true); }
+  });
+
+  document.getElementById("btn-salvar-precos").addEventListener("click", async () => {
+    try {
+      await window.kakawFin.salvarGeral({
+        precoTrufa: Number(document.getElementById("preco-trufa").value || 0),
+        precoCone: Number(document.getElementById("preco-cone").value || 0)
+      });
+      toastMsg("preços salvos ✦");
+      await carregarGeral();
+    } catch (e) { console.error(e); toastMsg("erro ao salvar ✕", true); }
+  });
+
+  /* ── Lançamentos (lotes) ──────────────────────────────────────── */
+  let tipoSelecionado = "cone";
+  let saborRecheioVinculado = null; // guarda o recheio cadastrado selecionado via autocomplete, se houver
+
+  document.getElementById("fab-add-lote").addEventListener("click", () => {
+    tipoSelecionado = "cone";
+    saborRecheioVinculado = null;
+    document.querySelectorAll("#seg-tipo .seg-btn").forEach(b => b.classList.toggle("sel", b.dataset.tipo === "cone"));
+    document.getElementById("lote-sabor").value = "";
+    document.getElementById("lote-valor-recheio").value = "";
+    document.getElementById("lote-quantidade").value = "";
+    atualizarPreviewLote();
+    abrirModal("modal-lote");
+  });
+
+  document.querySelectorAll("#seg-tipo .seg-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      tipoSelecionado = btn.dataset.tipo;
+      document.querySelectorAll("#seg-tipo .seg-btn").forEach(b => b.classList.toggle("sel", b === btn));
+      atualizarPreviewLote();
+    });
+  });
+
+  /* Autocomplete de sabor: digita, filtra recheios cadastrados, ao escolher preenche valor/recheio */
+  const inputSabor = document.getElementById("lote-sabor");
+  const sugestoesBox = document.getElementById("lote-sabor-sugestoes");
+
+  inputSabor.addEventListener("input", () => {
+    saborRecheioVinculado = null; // texto livre digitado, desvincula até escolher de novo
+    const termo = inputSabor.value.trim().toLowerCase();
+    if (!termo) { sugestoesBox.classList.remove("show"); sugestoesBox.innerHTML = ""; atualizarPreviewLote(); return; }
+    const filtrados = cacheRecheios.filter(r => r.nome.toLowerCase().includes(termo));
+    if (!filtrados.length) { sugestoesBox.classList.remove("show"); sugestoesBox.innerHTML = ""; atualizarPreviewLote(); return; }
+    sugestoesBox.innerHTML = filtrados.map(r =>
+      `<div class="autocomplete-item" data-id="${r.id}">${r.nome}<small>custo cadastrado: ${fmt(r.custoTotal)}</small></div>`
+    ).join("");
+    sugestoesBox.classList.add("show");
+    sugestoesBox.querySelectorAll(".autocomplete-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const r = cacheRecheios.find(x => x.id === item.dataset.id);
+        inputSabor.value = r.nome;
+        document.getElementById("lote-valor-recheio").value = r.custoTotal;
+        saborRecheioVinculado = r;
+        sugestoesBox.classList.remove("show");
+        atualizarPreviewLote();
+      });
+    });
+    atualizarPreviewLote();
+  });
+
+  document.addEventListener("click", e => {
+    if (!sugestoesBox.contains(e.target) && e.target !== inputSabor) {
+      sugestoesBox.classList.remove("show");
+    }
+  });
+
+  ["lote-valor-recheio", "lote-quantidade"].forEach(id => {
+    document.getElementById(id).addEventListener("input", atualizarPreviewLote);
+  });
+
+  function atualizarPreviewLote() {
+    const preview = document.getElementById("lote-preview");
+    const sabor = inputSabor.value.trim();
+    const valorRecheio = Number(document.getElementById("lote-valor-recheio").value || 0);
+    const qtd = Number(document.getElementById("lote-quantidade").value || 0);
+
+    if (!sabor || !valorRecheio || !qtd) {
+      preview.innerHTML = "preencha sabor, valor do recheio e quantidade para ver a prévia";
+      return;
+    }
+
+    const g = cacheGeral;
+    const custoRecheioUnit = valorRecheio / qtd;
+    let custoUnit, precoVenda;
+    if (tipoSelecionado === "cone") {
+      const enfeite = cacheEnfeites.find(e => e.nome.toLowerCase() === sabor.toLowerCase());
+      custoUnit = custoRecheioUnit + window.kakawFin.custoCasquinhaCone(g) + (enfeite ? Number(enfeite.valor) : 0);
+      precoVenda = Number(g.precoCone);
+    } else {
+      custoUnit = custoRecheioUnit + window.kakawFin.custoCasquinhaTrufa(g);
+      precoVenda = Number(g.precoTrufa);
+    }
+    const custoTotal = custoUnit * qtd;
+    const lucroBruto = precoVenda * qtd;
+    const lucroLiq = lucroBruto - custoTotal;
+    preview.innerHTML = `custo unitário: ${fmt(custoUnit)}<br>custo total: ${fmt(custoTotal)}<br>lucro bruto: ${fmt(lucroBruto)}<br>lucro líquido: ${fmt(lucroLiq)}`;
+  }
+
+  document.getElementById("btn-lancar-lote").addEventListener("click", async () => {
+    const sabor = inputSabor.value.trim();
+    const valorRecheio = document.getElementById("lote-valor-recheio").value;
+    const qtd = document.getElementById("lote-quantidade").value;
+
+    if (!sabor || valorRecheio === "" || !qtd || Number(qtd) <= 0) {
+      toastMsg("preencha todos os campos ✕", true);
+      return;
+    }
+
+    const btn = document.getElementById("btn-lancar-lote");
+    btn.disabled = true;
+    btn.textContent = "lançando...";
+    try {
+      await window.kakawFin.lancarLote({
+        tipo: tipoSelecionado, sabor, valorRecheio, quantidade: qtd
+      });
+      fecharModal("modal-lote");
+      toastMsg("lançamento registrado ✦");
+      await carregarLotes();
+    } catch (e) {
+      console.error(e);
+      toastMsg("erro ao lançar ✕", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "lançar";
+    }
+  });
+
+  async function carregarLotes() {
+    cacheLotes = await window.kakawFin.listarLotes();
+    const lista = document.getElementById("lista-lotes");
+    const empty = document.getElementById("lotes-empty");
+    const resumo = document.getElementById("resumo-geral");
+    lista.innerHTML = "";
+    empty.style.display = cacheLotes.length ? "none" : "block";
+
+    if (!cacheLotes.length) {
+      resumo.innerHTML = "";
+      return;
+    }
+
+    const totalCusto = cacheLotes.reduce((s, l) => s + Number(l.custoTotal || 0), 0);
+    const totalBruto = cacheLotes.reduce((s, l) => s + Number(l.lucroBruto || 0), 0);
+    const totalLiq   = cacheLotes.reduce((s, l) => s + Number(l.lucroLiquido || 0), 0);
+    resumo.innerHTML = `
+      <div>custo total<b>${fmt(totalCusto)}</b></div>
+      <div>lucro bruto<b>${fmt(totalBruto)}</b></div>
+      <div>lucro líquido<b>${fmt(totalLiq)}</b></div>`;
+
+    // Agrupa por dia (baseado na data de criadoEm)
+    let diaAtual = null;
+    cacheLotes.forEach(l => {
+      const data = l.criadoEm && l.criadoEm.toDate ? l.criadoEm.toDate() : new Date(l.criadoEm || Date.now());
+      const diaLabel = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      if (diaLabel !== diaAtual) {
+        diaAtual = diaLabel;
+        const header = document.createElement("div");
+        header.className = "dia-header";
+        header.innerHTML = `<span>${diaLabel}</span><div class="linha"></div>`;
+        lista.appendChild(header);
+      }
+      lista.appendChild(criarLoteCard(l));
+    });
+  }
+
+  function criarLoteCard(l) {
+    const card = document.createElement("div");
+    card.className = "lote-card";
+    card.innerHTML = `
+      <div class="lote-titulo">
+        <span>${l.tipo === "cone" ? "Cone" : "Trufa"} ${l.sabor}</span>
+        <span class="lote-tipo-tag">${l.quantidade} un.</span>
+      </div>
+      <div class="lote-grid">
+        <div><div class="lote-metric-lbl">Custo total</div><div class="lote-metric-val custo">${fmt(l.custoTotal)}</div></div>
+        <div><div class="lote-metric-lbl">Lucro bruto</div><div class="lote-metric-val">${fmt(l.lucroBruto)}</div></div>
+        <div><div class="lote-metric-lbl">Lucro líquido</div><div class="lote-metric-val lucro">${fmt(l.lucroLiquido)}</div></div>
+        <div><div class="lote-metric-lbl">Custo unitário</div><div class="lote-metric-val">${fmt(l.custoUnitario)}</div></div>
+      </div>
+      <button class="lote-excluir" title="excluir lançamento">excluir ✕</button>`;
+    card.querySelector(".lote-excluir").addEventListener("click", () => {
+      excluirComConfirmacao("lançamento", `${l.tipo} ${l.sabor}`, async () => {
+        await window.kakawFin.excluirLote(l.id);
+        await carregarLotes();
+      });
+    });
+    return card;
+  }
+
+  iniciar();
+</script>
+
+<!-- MENU COMPARTILHADO -->
+<script src="menu.js"></script>
+</body>
+</html>
