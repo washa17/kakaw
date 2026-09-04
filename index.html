@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>kakaw · doces artesanais</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Jost:wght@200;300&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#F5EFE2; --bgCard:#EDE5D4; --div:#DDD4BC;
+    --verde:#3A5C2C; --choco:#5C3418; --cara:#A07828;
+    --dark:#1A1208; --muted:#8A7860; --mutedL:#B0A890; --white:#FFFCF5;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--bg);}
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+  input::placeholder{color:var(--mutedL);font-family:'Jost',sans-serif;font-weight:300;}
+
+  .inp{
+    width:100%;padding:12px 14px;
+    background:var(--white);border:1px solid var(--div);border-radius:5px;
+    font-family:'Jost',sans-serif;font-weight:300;font-size:.95rem;
+    color:var(--dark);outline:none;transition:border .2s, box-shadow .2s;
+    -webkit-appearance:none;
+  }
+  .inp:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(58,92,44,.12);}
+
+  .prod{
+    flex:1;padding:12px 6px;
+    background:var(--white);border:1px solid var(--div);
+    border-radius:5px;outline:none;
+    font-family:'DM Mono',monospace;
+    font-size:.52rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--muted);cursor:pointer;transition:all .2s;text-align:center;
+  }
+  .prod:hover{border-color:var(--verde);color:var(--verde);}
+  .prod.av{background:var(--verde);border-color:var(--verde);color:var(--white);}
+  .prod.ac{background:var(--choco);border-color:var(--choco);color:var(--white);}
+  .prod.ak{background:var(--cara);border-color:var(--cara);color:var(--white);}
+  .prod.at{background:#8B2635;border-color:#8B2635;color:var(--white);}
+
+  .salvar{
+    width:100%;padding:15px;
+    background:var(--verde);border:none;border-radius:5px;outline:none;
+    font-family:'DM Mono',monospace;
+    font-size:.52rem;letter-spacing:.38em;text-transform:uppercase;
+    color:var(--white);cursor:pointer;transition:background .2s;
+  }
+  .salvar:hover:not(:disabled){background:#4A7A38;}
+  .salvar:disabled{opacity:.35;cursor:default;}
+  .salvar.ok{background:#4A7A38;}
+
+  .sugg{
+    position:absolute;top:100%;left:0;right:0;
+    background:var(--white);border:1px solid var(--div);border-top:none;z-index:40;
+    border-radius:0 0 5px 5px;display:none;
+  }
+  .sugg.show{display:block;}
+  .sugg-row{
+    padding:11px 14px;
+    font-family:'Jost',sans-serif;font-weight:300;font-size:.85rem;color:var(--dark);
+    cursor:pointer;border-bottom:1px solid var(--bg);transition:background .15s;
+  }
+  .sugg-row:last-child{border-bottom:none;}
+  .sugg-row:hover{background:var(--bgCard);}
+
+  .ham{background:none;border:none;cursor:pointer;padding:6px;display:flex;flex-direction:column;gap:5px;}
+  .ham span{display:block;width:20px;height:1px;background:var(--verde);}
+  .ham span:nth-child(2){width:13px;}
+
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+    background:var(--verde);color:var(--white);
+    padding:12px 28px;border-radius:5px;
+    font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.35em;text-transform:uppercase;
+    box-shadow:0 4px 20px rgba(58,92,44,.3);white-space:nowrap;z-index:200;display:none;
+  }
+  .toast.show{display:block;}
+  .toast.erro{background:var(--choco);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+  @keyframes florGira{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes florPulse{0%,100%{opacity:1}50%{opacity:.75}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+  .hero-anim{animation:fadeUp .7s ease both;}
+  .hero-anim:nth-child(1){animation-delay:.05s}
+  .hero-anim:nth-child(2){animation-delay:.15s}
+  .hero-anim:nth-child(3){animation-delay:.22s}
+  .hero-anim:nth-child(4){animation-delay:.28s}
+  .flor-anim{animation:florGira 20s linear infinite;transform-origin:center;}
+  .flor-wrap{animation:florPulse 4s ease-in-out infinite;}
+  .salvar.pronto{animation:pulse .4s ease;}
+
+  #progresso{height:2px;background:var(--div);margin:0 8vw 1.4rem;border-radius:2px;overflow:hidden;}
+  #progresso-bar{height:100%;width:0%;background:var(--verde);transition:width .4s cubic-bezier(.4,0,.2,1);}
+
+  .skeleton-line{
+    height:12px;border-radius:3px;margin-bottom:8px;
+    background:linear-gradient(90deg,var(--div) 25%,var(--bgCard) 50%,var(--div) 75%);
+    background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;
+  }
+  #preview-skeleton{display:none;padding:1rem 1.2rem;margin-bottom:1.4rem;background:var(--white);border:1px solid var(--div);border-radius:5px;}
+  #preview-skeleton.show{display:block;}
+  #preview{display:none;}
+  #preview.show{display:block;}
+
+  .lbl{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block;}
+  .lbl-cara{color:var(--cara);}
+  .lbl-verde{color:var(--verde);}
+
+  #loading-overlay{
+    position:fixed;inset:0;background:var(--bg);
+    z-index:200;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:1rem;transition:opacity .4s;
+  }
+  #loading-overlay.hide{opacity:0;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <svg width="48" height="48" viewBox="0 0 96 96" fill="none">
+    <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+    <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+    <g style="animation:florGira 2s linear infinite;transform-origin:48px 48px;">
+      <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+      <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+    </g>
+  </svg>
+  <div style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);">conectando...</div>
+</div>
+
+<!-- APP -->
+<div style="background:var(--bg);min-height:100vh;">
+
+  <!-- NAV -->
+  <div style="padding:16px 20px;display:flex;align-items:center;background:var(--bg);border-bottom:1px solid var(--div);position:sticky;top:0;z-index:50;">
+    <button class="ham" onclick="openMenu()"><span></span><span></span><span></span></button>
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:10px;">
+      <svg width="24" height="24" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+        <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+        <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+        <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+        <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+        <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+        <path d="M55 41 C61 30 57 20 49 23 C41 26 42 37 55 41Z" fill="#5C3418" opacity=".08" stroke="#5C3418" stroke-width=".9"/>
+        <path d="M55 55 C66 61 76 57 73 49 C70 41 59 42 55 55Z" fill="#3A5C2C" opacity=".08" stroke="#3A5C2C" stroke-width=".9"/>
+        <path d="M41 55 C35 66 39 76 47 73 C55 70 54 59 41 55Z" fill="#5C3418" opacity=".08" stroke="#5C3418" stroke-width=".9"/>
+        <path d="M41 41 C30 35 20 39 23 47 C26 55 37 54 41 41Z" fill="#3A5C2C" opacity=".08" stroke="#3A5C2C" stroke-width=".9"/>
+      </svg>
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:1.28rem;color:var(--dark);letter-spacing:.02em;line-height:1;">kakaw</div>
+    </div>
+    <div style="width:34px;"></div>
+  </div>
+
+  <!-- HERO -->
+  <div style="padding:1.4rem 8vw 1.2rem;text-align:center;border-bottom:1px solid var(--div);">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:.45rem;">
+      <svg class="hero-anim flor-wrap" width="80" height="80" viewBox="0 0 96 96" fill="none">
+        <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+        <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+        <g class="flor-anim">
+          <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+          <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+          <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+          <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+          <path d="M55 41 C61 30 57 20 49 23 C41 26 42 37 55 41Z" fill="#5C3418" opacity=".08" stroke="#5C3418" stroke-width=".9"/>
+          <path d="M55 55 C66 61 76 57 73 49 C70 41 59 42 55 55Z" fill="#3A5C2C" opacity=".08" stroke="#3A5C2C" stroke-width=".9"/>
+          <path d="M41 55 C35 66 39 76 47 73 C55 70 54 59 41 55Z" fill="#5C3418" opacity=".08" stroke="#5C3418" stroke-width=".9"/>
+          <path d="M41 41 C30 35 20 39 23 47 C26 55 37 54 41 41Z" fill="#3A5C2C" opacity=".08" stroke="#3A5C2C" stroke-width=".9"/>
+        </g>
+      </svg>
+      <div class="hero-anim" style="font-family:'Playfair Display',serif;font-style:italic;font-weight:400;font-size:2.4rem;color:var(--dark);letter-spacing:.02em;line-height:1;">kakaw</div>
+      <div class="hero-anim" style="height:1px;width:110px;background:var(--choco);"></div>
+      <div class="hero-anim" style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.45em;text-transform:uppercase;color:var(--choco);">doces artesanais</div>
+    </div>
+  </div>
+
+  <!-- LABEL SEÇÃO -->
+  <div style="padding:2rem 8vw .8rem;display:flex;align-items:baseline;gap:1.5rem;">
+    <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.4em;text-transform:uppercase;color:var(--mutedL);">01</span>
+    <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:1.5rem;color:var(--dark);">Nova Compra</span>
+    <div style="flex:1;height:1px;background:var(--div);margin-bottom:3px;"></div>
+    <span style="font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mutedL);">preencha os campos</span>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div id="progresso"><div id="progresso-bar"></div></div>
+
+  <!-- FORM -->
+  <div style="padding:0 8vw 4rem;">
+
+    <!-- NOME -->
+    <div style="margin-bottom:1.4rem;position:relative;">
+      <span class="lbl">Cliente</span>
+      <input class="inp" id="inp-nome" placeholder="nome da cliente..." oninput="onNome(this.value)" onblur="hideSugg()"/>
+      <div class="sugg" id="sugg"></div>
+    </div>
+
+    <!-- PRODUTO -->
+    <div style="margin-bottom:1.4rem;">
+      <span class="lbl">Produto</span>
+      <div style="display:flex;gap:8px;">
+        <button class="prod" id="btn-trufa" onclick="setProduto('Trufa')">Trufa</button>
+        <button class="prod" id="btn-cone"  onclick="setProduto('Cone')">Cone</button>
+        <button class="prod" id="btn-torta" onclick="setProduto('Torta')">Torta</button>
+        <button class="prod" id="btn-outro" onclick="setProduto('Outro')">+ Outro</button>
+      </div>
+    </div>
+
+    <!-- OUTRO -->
+    <div id="outro-block" style="border:1px solid var(--cara);border-radius:5px;padding:1.2rem;margin-bottom:1.4rem;background:var(--white);display:none;">
+      <span class="lbl lbl-cara">Detalhes do produto</span>
+      <div style="margin-bottom:1rem;">
+        <span class="lbl">Descrição</span>
+        <input class="inp" id="inp-desc" placeholder="ex: caixinha, bolo..." oninput="updatePreview();checkValido()"/>
+      </div>
+      <div>
+        <span class="lbl">Preço (R$)</span>
+        <input class="inp" id="inp-preco" type="number" placeholder="0,00" oninput="updatePreview();checkValido()"/>
+      </div>
+    </div>
+
+    <!-- QTD + DATA -->
+    <div style="display:flex;gap:12px;margin-bottom:1.4rem;">
+      <div style="flex:1;">
+        <span class="lbl">Quantidade</span>
+        <input class="inp" id="inp-qtd" inputmode="numeric" pattern="[0-9]*" placeholder="0" oninput="state.qtd=this.value.trim();updatePreview();checkValido()"/>
+      </div>
+      <div style="flex:1;">
+        <span class="lbl">Data</span>
+        <input class="inp" id="inp-data" placeholder="dd/mm" oninput="state.data=this.value;updatePreview()"/>
+      </div>
+    </div>
+
+    <!-- OBS -->
+    <div style="margin-bottom:2rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span class="lbl" style="margin-bottom:0;">Observação</span>
+        <span class="lbl" style="margin-bottom:0;color:var(--mutedL);">opcional</span>
+      </div>
+      <input class="inp" id="inp-obs" placeholder="alguma observação..." oninput="state.obs=this.value"/>
+    </div>
+
+    <!-- DIVISOR -->
+    <div style="height:1px;background:var(--div);margin:0 0 1.4rem;"></div>
+
+    <!-- SKELETON PREVIEW -->
+    <div id="preview-skeleton">
+      <div class="skeleton-line" style="width:40%;"></div>
+      <div class="skeleton-line" style="width:75%;margin-bottom:0;"></div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="preview" style="background:var(--white);border:1px solid var(--div);border-radius:5px;padding:1rem 1.2rem;margin-bottom:1.4rem;">
+      <span class="lbl lbl-verde">Prévia</span>
+      <div id="preview-text" style="font-family:'Jost',sans-serif;font-weight:300;font-size:.95rem;color:var(--muted);line-height:1.9;"></div>
+    </div>
+
+    <!-- SALVAR -->
+    <button class="salvar" id="btn-salvar" disabled onclick="salvar()">salvar compra</button>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">compra salva com sucesso ✦</div>
+
+<!-- FOOTER -->
+<footer style="background:var(--bg);border-top:1px solid var(--div);padding:1.2rem 8vw;text-align:center;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+    <svg width="20" height="20" viewBox="0 0 96 96" fill="none">
+      <circle cx="48" cy="48" r="10" stroke="#3A5C2C" stroke-width="1.5"/>
+      <circle cx="48" cy="48" r="4" fill="#3A5C2C"/>
+      <path d="M48 38 C43 26 31 25 30 35 C29 45 40 47 48 38Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M58 48 C70 43 71 31 61 30 C51 29 49 40 58 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+      <path d="M48 58 C53 70 65 71 66 61 C67 51 56 49 48 58Z" fill="#3A5C2C" opacity=".12" stroke="#3A5C2C" stroke-width="1.1"/>
+      <path d="M38 48 C26 53 25 65 35 66 C45 67 47 56 38 48Z" fill="#5C3418" opacity=".12" stroke="#5C3418" stroke-width="1.1"/>
+    </svg>
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.3em;text-transform:uppercase;color:var(--mutedL);">kakaw · doces artesanais</div>
+    <div style="font-family:'DM Mono',monospace;font-size:.35rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mutedL);opacity:.6;">versão 1.0 · 2025</div>
+  </div>
+</footer>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc,
+           getDocs, addDoc, setDoc,
+           serverTimestamp, query, orderBy }        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCv8YuWm13yscXDWfkIRvFtRy6ZVO0Wgok",
+    authDomain:        "kakaw-web.firebaseapp.com",
+    projectId:         "kakaw-web",
+    storageBucket:     "kakaw-web.firebasestorage.app",
+    messagingSenderId: "229104514189",
+    appId:             "1:229104514189:web:3ae6c7c3de736f508e9ec4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  function normalizar(str){
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+  }
+
+  let clientesDB = [];
+
+  async function carregarClientes(){
+    try {
+      const snap = await getDocs(collection(db,"clientes"));
+      clientesDB = snap.docs.map(d => ({ id: d.id, nome: d.data().nome }));
+    } catch(e){
+      console.error("Erro ao carregar clientes:", e);
+    }
+    document.getElementById("loading-overlay").classList.add("hide");
+  }
+
+  carregarClientes();
+
+  const state = { nome:"", produto:null, qtd:"1", data:"", obs:"", desc:"", preco:"" };
+
+  const h = new Date();
+  const dd = String(h.getDate()).padStart(2,"0");
+  const mm = String(h.getMonth()+1).padStart(2,"0");
+  state.data = `${dd}/${mm}`;
+  document.getElementById("inp-data").value = state.data;
+  document.getElementById("inp-qtd").value  = "1";
+
+  window.onNome = (v) => {
+    state.nome = v;
+    const sugg = document.getElementById("sugg");
+    const norm = normalizar(v);
+    const filtrados = clientesDB.filter(c => v.length > 0 && normalizar(c.nome).includes(norm));
+    if(filtrados.length > 0){
+      sugg.innerHTML = filtrados.map(c => `<div class="sugg-row" onmousedown="pickCliente('${c.nome.replace(/'/g,"\\'")}')"> ${c.nome}</div>`).join("");
+      sugg.classList.add("show");
+    } else {
+      sugg.classList.remove("show");
+    }
+    updatePreview(); checkValido();
+  };
+
+  window.hideSugg = () => setTimeout(() => document.getElementById("sugg").classList.remove("show"), 160);
+
+  window.pickCliente = (nome) => {
+    state.nome = nome;
+    document.getElementById("inp-nome").value = nome;
+    document.getElementById("sugg").classList.remove("show");
+    updatePreview(); checkValido();
+  };
+
+  window.setProduto = (p) => {
+    state.produto = p;
+    ["Trufa","Cone","Torta","Outro"].forEach(x => {
+      const cls = x==="Trufa"?"ac":x==="Cone"?"av":x==="Torta"?"at":"ak";
+      document.getElementById("btn-"+x.toLowerCase()).classList.toggle(cls, x===p);
+    });
+    document.getElementById("outro-block").style.display = p==="Outro" ? "block" : "none";
+    syncState();
+    updatePreview();
+    checkValido();
+  };
+
+  function syncState(){
+    state.nome  = document.getElementById("inp-nome").value.trim();
+    state.qtd   = document.getElementById("inp-qtd").value.trim();
+    state.data  = document.getElementById("inp-data").value.trim();
+    state.obs   = document.getElementById("inp-obs").value.trim();
+    state.desc  = document.getElementById("inp-desc").value.trim();
+    state.preco = document.getElementById("inp-preco").value.trim();
+  }
+
+  let skeletonTimer = null;
+  function updatePreview(){
+    syncState();
+    const {nome, produto, qtd, data, desc, preco} = state;
+    const prev = document.getElementById("preview");
+    const skel = document.getElementById("preview-skeleton");
+    const txt  = document.getElementById("preview-text");
+    if(nome && produto && qtd){
+      if(!prev.classList.contains("show")){
+        skel.classList.add("show");
+        prev.classList.remove("show");
+        clearTimeout(skeletonTimer);
+        skeletonTimer = setTimeout(() => {
+          skel.classList.remove("show");
+          prev.classList.add("show");
+        }, 500);
+      }
+      const cor   = produto==="Trufa"?"#5C3418":produto==="Cone"?"#3A5C2C":produto==="Torta"?"#8B2635":"#A07828";
+      const label = produto==="Outro"?(desc||"outro"):produto;
+      let html = `<span style="color:#1A1208">${nome}</span>  ·  <span style="color:${cor}">${qtd}× ${label}</span>  ·  ${data}`;
+      if(produto==="Outro" && preco) html += `  ·  <span style="color:#A07828">R$${preco}</span>`;
+      txt.innerHTML = html;
+    } else {
+      clearTimeout(skeletonTimer);
+      skel.classList.remove("show");
+      prev.classList.remove("show");
+    }
+  }
+  window.updatePreview = updatePreview;
+
+  function checkValido(){
+    syncState();
+    const {nome, produto, qtd, desc, preco} = state;
+    const ok = nome && produto && qtd && (produto!=="Outro"||(desc&&preco));
+    const btn = document.getElementById("btn-salvar");
+    const wasDisabled = btn.disabled;
+    btn.disabled = !ok;
+    if(ok && wasDisabled){ btn.classList.remove("pronto"); void btn.offsetWidth; btn.classList.add("pronto"); }
+    let steps=0, total=3;
+    if(nome) steps++;
+    if(produto){ steps++; if(produto==="Outro"){ total=5; if(desc) steps++; if(preco) steps++; } }
+    if(qtd) steps++;
+    document.getElementById("progresso-bar").style.width = (total>0?Math.round((steps/total)*100):0)+"%";
+  }
+  window.checkValido = checkValido;
+
+  window.salvar = async () => {
+    syncState();
+    const btn   = document.getElementById("btn-salvar");
+    const toast = document.getElementById("toast");
+    btn.disabled = true;
+    btn.textContent = "salvando...";
+
+    try {
+      const nomeNorm = normalizar(state.nome);
+      let clienteId = null;
+      const existente = clientesDB.find(c => normalizar(c.nome) === nomeNorm);
+
+      if(existente){
+        clienteId = existente.id;
+      } else {
+        const nomeFormatado = state.nome.trim().replace(/\b\w/g, l => l.toUpperCase());
+        const novoCliente = await addDoc(collection(db,"clientes"), {
+          nome: nomeFormatado,
+          ativo: true,
+          criadoEm: serverTimestamp()
+        });
+        clienteId = novoCliente.id;
+        clientesDB.push({ id: clienteId, nome: nomeFormatado });
+      }
+
+      const pedido = {
+        produto:    state.produto,
+        quantidade: Number(state.qtd),
+        data:       state.data,
+        obs:        state.obs || "",
+        criadoEm:   serverTimestamp()
+      };
+      if(state.produto === "Outro"){
+        pedido.descricao = state.desc;
+        pedido.preco     = Number(state.preco);
+      }
+
+      const pedRef = await addDoc(collection(db,"clientes",clienteId,"pedidos"), pedido);
+
+      const expira = new Date();
+      expira.setDate(expira.getDate()+7);
+      await addDoc(collection(db,"historico"), {
+        tipo:        "adicionado",
+        clienteId,
+        clienteNome: clientesDB.find(c=>c.id===clienteId)?.nome || state.nome,
+        dados:       { ...pedido, pedidoId: pedRef.id },
+        criadoEm:   serverTimestamp(),
+        expiraEm:   expira
+      });
+
+      btn.classList.add("ok");
+      btn.textContent = "✦  compra registrada";
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        btn.classList.remove("ok");
+        btn.textContent = "salvar compra";
+        toast.classList.remove("show");
+        state.nome=""; state.produto=null; state.qtd=""; state.obs=""; state.desc=""; state.preco="";
+        document.getElementById("inp-nome").value="";
+        document.getElementById("inp-qtd").value="1";
+        document.getElementById("inp-desc").value="";
+        document.getElementById("inp-preco").value="";
+        document.getElementById("inp-obs").value="";
+        ["Trufa","Cone","Torta","Outro"].forEach(x=>{
+          const cls=x==="Trufa"?"ac":x==="Cone"?"av":x==="Torta"?"at":"ak";
+          document.getElementById("btn-"+x.toLowerCase()).classList.remove(cls);
+        });
+        document.getElementById("outro-block").style.display="none";
+        document.getElementById("preview").classList.remove("show");
+        state.nome=""; state.produto=null; state.qtd="1";
+        state.obs=""; state.desc=""; state.preco="";
+        checkValido();
+        const n=new Date();
+        state.data=`${String(n.getDate()).padStart(2,"0")}/${String(n.getMonth()+1).padStart(2,"0")}`;
+        document.getElementById("inp-data").value=state.data;
+      }, 1800);
+
+    } catch(e){
+      console.error("Erro ao salvar:", e);
+      toast.textContent = "erro ao salvar ✕";
+      toast.classList.add("show","erro");
+      setTimeout(()=>{ toast.classList.remove("show","erro"); toast.textContent="compra salva com sucesso ✦"; }, 3000);
+      btn.disabled = false;
+      btn.textContent = "salvar compra";
+    }
+  };
+</script>
+
+<!-- MENU COMPARTILHADO -->
+<script src="menu.js"></script>
+</body>
+</html>
